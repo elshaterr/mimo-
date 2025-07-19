@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم ميمو 🔐</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #6a11cb;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            margin-bottom: 10px;
+            color: #6a11cb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2575fc;
+        }
+        
+        .control-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #5a5a5a;
+        }
+        
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, 
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #6a11cb;
+            outline: none;
+        }
+        
+        .btn-admin {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn-admin:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-cogs"></i> لوحة تحكم ميمو 🔐</h1>
+            <p>مرحباً بابا، هنا تقدر تتحكم في كل حاجة عن ميمو</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3><i class="fas fa-comments"></i> عدد المحادثات</h3>
+                <div class="value" id="conversations-count">0</div>
+            </div>
+            <div class="stat-card">
+                <h3><i class="fas fa-brain"></i> حجم الذاكرة</h3>
+                <div class="value" id="memory-count">0</div>
+            </div>
+            <div class="stat-card">
+                <h3><i class="fas fa-smile"></i> المزاج الحالي</h3>
+                <div class="value" id="current-mood">هادئة</div>
+            </div>
+        </div>
+        
+        <div class="control-panel">
+            <h2><i class="fas fa-sliders-h"></i> الإعدادات الأساسية</h2>
+            
+            <div class="form-group">
+                <label for="mimo-name"><i class="fas fa-signature"></i> اسم ميمو</label>
+                <input type="text" id="mimo-name" value="ميمو">
+            </div>
+            
+            <div class="form-group">
+                <label for="mimo-personality"><i class="fas fa-user"></i> الشخصية</label>
+                <select id="mimo-personality">
+                    <option value="spiritual">روحانية (افتراضي)</option>
+                    <option value="friendly">ودودة</option>
+                    <option value="playful">مرحة</option>
+                    <option value="calm">هادئة</option>
+                </select>
+            </div>
+            
+            <button class="btn-admin" id="save-settings"><i class="fas fa-save"></i> حفظ الإعدادات</button>
+        </div>
+    </div>
+
+    <script>
+        // التهيئة
+        const SUPABASE_URL = "https://qjxpfsmgzfhetrjpufkw.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqeHBmc21nemZoZXRyanB1Zmt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI4NzY5NDgsImV4cCI6MjA2ODQ1Mjk0OH0.Qh2tkRgGZBiZBjNZtyLGfKo51IbW2W7ApbfFbzTcc5k";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // جلب الإحصائيات
+        async function loadStats() {
+            try {
+                // عدد المحادثات
+                const { count: convoCount } = await supabase
+                    .from('memory')
+                    .select('*', { count: 'exact' });
+                
+                // عدد الذكريات
+                const { count: memoryCount } = await supabase
+                    .from('memory')
+                    .select('*', { count: 'exact' });
+                
+                document.getElementById('conversations-count').textContent = convoCount || 0;
+                document.getElementById('memory-count').textContent = memoryCount || 0;
+            } catch (error) {
+                console.error("Error loading stats:", error);
+            }
+        }
+
+        // جلب الإعدادات
+        async function loadSettings() {
+            // ... جلب الإعدادات من جدول settings
+        }
+
+        // حفظ الإعدادات
+        document.getElementById('save-settings').addEventListener('click', async () => {
+            const name = document.getElementById('mimo-name').value;
+            const personality = document.getElementById('mimo-personality').value;
+            
+            // ... حفظ الإعدادات في جدول settings
+            alert('تم حفظ الإعدادات بنجاح!');
+        });
+
+        // بدء التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadSettings();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ميمو بنتي الرقمية 👧🏻</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <header>
+        <img src="https://cdn.pixabay.com/photo/2023/02/25/12/41/ai-generated-7813300_640.png" alt="ميمو" class="avatar">
+        <div class="mood-indicator">
+            <span id="mood-status">ميمو: أنا هادئة دلوقتي يا بابا 🌿</span>
+        </div>
+    </header>
+
+    <main>
+        <section class="chat-container">
+            <div id="chat-history"></div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="اكتب رسالتك هنا...">
+                <button id="send-btn">إرسال</button>
+            </div>
+        </section>
+
+        <section class="memory-section">
+            <h2>📝 ذاكرة ميمو</h2>
+            <div id="memory-preview"></div>
+        </section>
+    </main>
+
+    <footer>
+        <button id="memory-btn">ذاكرتي</button>
+        <button id="admin-btn">الإدارة</button>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
